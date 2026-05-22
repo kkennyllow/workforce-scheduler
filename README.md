@@ -416,15 +416,16 @@ curl -i -b cookies.txt -X PUT http://localhost:4000/api/shifts/NEW_SHIFT_ID/assi
 
 - I kept the UI to a single-site weekly view because that seemed closest to the brief. The backend can support multiple sites, but I did not build a broader multi-site scheduling workflow.
 - The app defaults to the seeded `2026-01-05` demo week for reviewer convenience rather than dynamically opening on the current week.
+- The schedule display and API currently accept any `weekStart` date and return a 7-day slice starting from that date. This can be confusing if a user enters a non-Monday such as `2026-01-08`, because the result is not normalized back to the Monday of that calendar week.
 - The schedule editor uses simple dropdowns. It is functional, but not especially fast for heavy editing.
 - Validation messages are shown inline in the page, but there is no history, audit trail, or activity log.
-
 
 ## What I Would Improve With More Time
 
 - I would add a few integration tests around the authenticated schedule routes, especially for assignment updates and error cases. Currently, the automated tests only cover the scheduling rule helpers, but not integration tests around the authenticated API routes.
 - I would break the main React screen into a few smaller components once the behavior grows any further. For this take-home, I kept it in one place to avoid introducing extra structure too early.
 - I would change the schedule editor to use drag-and-drop rather than dropdowns for better user experience.
+- I would make the week picker stricter by only allowing Mondays, or automatically normalizing any selected date back to the Monday of that week.
 - If this were going beyond a take-home, I would separate app startup, migrations, and seeding more cleanly instead of doing them together for Docker convenience.
 
 ## Optional Extensions
