@@ -10,9 +10,8 @@
 
 Starter used:
 
-- Frontend started from the standard Vite React + TypeScript scaffold.
-- Backend is a small custom Express + TypeScript setup rather than a larger starter template.
-
+- Frontend started from the standard Vite + React + TypeScript scaffold.
+- Backend is a small custom Express + TypeScript API with simple REST routes.
 
 ## Project Structure
 
