@@ -292,9 +292,9 @@ Validation error codes:
 - `WEEKLY_HOURS_EXCEEDED`
 - `CERTIFICATION_REQUIRED`
 
-Known limitation:
+Notes:
 
-- The full schedule frontend is not built yet. Use the API directly for schedule and assignment testing.
+- `GET /api/sites` exists mainly as a small helper for the frontend to resolve the seeded single site reliably on startup.
 
 ## Manual Schedule Testing
 
@@ -308,18 +308,18 @@ curl -i -c cookies.txt -X POST http://localhost:4000/api/auth/login \
 
 ### Read the weekly schedule
 
-If your local database has been reseeded multiple times, numeric IDs may differ. To find the current site IDs:
+On a clean setup, `Central Operations Hub` is seeded as `siteId=1`.
+
+If you want to confirm the current site IDs:
 
 ```bash
 docker compose exec db psql -U postgres -d workforce_scheduler -c \
   'SELECT id, name FROM "Site" ORDER BY id;'
 ```
 
-On the database I verified in this task, `Central Operations Hub` is `siteId=4`.
-
 ```bash
 curl -i -b cookies.txt \
-  "http://localhost:4000/api/schedule?siteId=4&weekStart=2026-01-05"
+  "http://localhost:4000/api/schedule?siteId=1&weekStart=2026-01-05"
 ```
 
 ### Read staff list
@@ -333,8 +333,8 @@ curl -i -b cookies.txt http://localhost:4000/api/staff
 First check `/api/staff` for current staff profile IDs. On the database I verified here:
 
 - Alice = `staffId=1`
-- Carol = `staffId=2`
-- Bob = `staffId=3`
+- Bob = `staffId=2`
+- Carol = `staffId=3`
 - Dan = `staffId=4`
 - Eve = `staffId=5`
 
@@ -386,29 +386,29 @@ Weekly hours:
 ```bash
 curl -i -b cookies.txt -X PUT http://localhost:4000/api/shifts/6/assignment \
   -H "Content-Type: application/json" \
-  -d '{"staffId": 3}'
+  -d '{"staffId": 2}'
 
 curl -i -b cookies.txt -X PUT http://localhost:4000/api/shifts/9/assignment \
   -H "Content-Type: application/json" \
-  -d '{"staffId": 3}'
+  -d '{"staffId": 2}'
 
 curl -i -b cookies.txt -X PUT http://localhost:4000/api/shifts/18/assignment \
   -H "Content-Type: application/json" \
-  -d '{"staffId": 3}'
+  -d '{"staffId": 2}'
 ```
 
 For a true overlap check, create a temporary overlapping shift in Postgres and then assign it through the API:
 
 ```bash
 docker compose exec db psql -U postgres -d workforce_scheduler -c \
-  "INSERT INTO \"Shift\" (\"siteId\", \"kind\", \"startAt\", \"endAt\", \"requiredCertificationId\", \"createdAt\", \"updatedAt\") VALUES (4, 'MORNING', '2026-01-05 10:00:00+00', '2026-01-05 18:00:00+00', 3, NOW(), NOW());"
+  "INSERT INTO \"Shift\" (\"siteId\", \"kind\", \"startAt\", \"endAt\", \"requiredCertificationId\", \"createdAt\", \"updatedAt\") VALUES (1, 'MORNING', '2026-01-05 10:00:00+00', '2026-01-05 18:00:00+00', 3, NOW(), NOW());"
 ```
 
 Then find the new shift ID and assign it to Alice, who already has the Monday morning shift:
 
 ```bash
 docker compose exec db psql -U postgres -d workforce_scheduler -c \
-  'SELECT id, "startAt", "endAt" FROM "Shift" WHERE "siteId" = 4 ORDER BY id DESC LIMIT 3;'
+  'SELECT id, "startAt", "endAt" FROM "Shift" WHERE "siteId" = 1 ORDER BY id DESC LIMIT 3;'
 
 curl -i -b cookies.txt -X PUT http://localhost:4000/api/shifts/NEW_SHIFT_ID/assignment \
   -H "Content-Type: application/json" \
