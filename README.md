@@ -15,24 +15,6 @@ Starter used:
 - Frontend started from the standard Vite React + TypeScript scaffold.
 - Backend is a small custom Express + TypeScript setup rather than a larger starter template.
 
-## Current Status
-
-This project currently includes:
-
-- PostgreSQL running in Docker
-- Express API running in Docker
-- React app running in Docker
-- `GET /api/health` endpoint
-- Cookie-based JWT authentication endpoints
-- Role middleware for authenticated and supervisor-only routes
-- Core schedule API endpoints for weekly schedule reads and assignment updates
-- Basic CORS configuration for local development
-- Prisma schema, migration, and seed data for the initial workforce domain
-- React frontend with role-based supervisor and staff scheduling views
-
-This project still does not include:
-
-- Advanced scheduling UX like drag-and-drop or calendar views
 
 ## Project Structure
 
@@ -127,10 +109,6 @@ npm install
 npm run typecheck
 npm run build
 ```
-
-## Next Steps
-
-- Refine the schedule UI and add richer editing ergonomics
 
 ## Database Workflow
 
