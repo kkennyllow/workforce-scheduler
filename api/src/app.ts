@@ -7,6 +7,7 @@ import { clearAuthCookie, setAuthCookie, signAuthToken } from "./auth";
 import { prisma } from "./db";
 import {
   requireAuth,
+  requireStaff,
   requireSupervisor,
   type AuthenticatedRequest,
 } from "./middleware";
@@ -302,7 +303,7 @@ app.get(
   },
 );
 
-app.get("/api/my-shifts", requireAuth, async (request, response) => {
+app.get("/api/my-shifts", requireAuth, requireStaff, async (request, response) => {
   const weekStart = parseWeekStart(request.query.weekStart);
   const { currentUser } = request as AuthenticatedRequest;
 

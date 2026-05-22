@@ -69,3 +69,21 @@ export function requireSupervisor(
 
   next();
 }
+
+export function requireStaff(
+  request: Request,
+  response: Response,
+  next: NextFunction,
+) {
+  const authenticatedRequest = request as AuthenticatedRequest;
+
+  if (authenticatedRequest.currentUser.role !== UserRole.STAFF) {
+    response.status(403).json({
+      error: "Forbidden",
+      message: "Staff access is required for this resource.",
+    });
+    return;
+  }
+
+  next();
+}

@@ -165,8 +165,7 @@ The seed is written to be safe to re-run. It uses upserts for the base records a
 - The seeded dataset is a demo fixture for the week starting `2026-01-05`.
 - The app defaults to the seeded demo week `2026-01-05` so the core flow is immediately visible to reviewers.
 - Staff users are read-only in the UI and can only view their own assigned shifts.
-
-
+- Supervisors manage schedules but are not themselves scheduled into shifts.
 
 ## Seeded Login Details
 
@@ -254,7 +253,7 @@ Access rules:
 - `GET /api/schedule` requires supervisor role
 - `PUT /api/shifts/:shiftId/assignment` requires supervisor role
 - `GET /api/staff` requires supervisor role
-- `GET /api/my-shifts` requires authentication and returns only the logged-in user's assigned shifts
+- `GET /api/my-shifts` requires staff role and returns only the logged-in staff user's assigned shifts
 
 Scheduling rules enforced by the API:
 
@@ -418,11 +417,11 @@ curl -i -b cookies.txt -X PUT http://localhost:4000/api/shifts/NEW_SHIFT_ID/assi
 - The app defaults to the seeded `2026-01-05` demo week for reviewer convenience rather than dynamically opening on the current week.
 - The schedule editor uses simple dropdowns. It is functional, but not especially fast for heavy editing.
 - Validation messages are shown inline in the page, but there is no history, audit trail, or activity log.
-- The automated tests currently cover the scheduling rule helpers, but I did not add integration tests around the authenticated API routes.
+
 
 ## What I Would Improve With More Time
 
-- I would add a few integration tests around the authenticated schedule routes, especially for assignment updates and error cases.
+- I would add a few integration tests around the authenticated schedule routes, especially for assignment updates and error cases. Currently, the automated tests only cover the scheduling rule helpers, but not integration tests around the authenticated API routes.
 - I would break the main React screen into a few smaller components once the behavior grows any further. For this take-home, I kept it in one place to avoid introducing extra structure too early.
 - I would change the schedule editor to use drag-and-drop rather than dropdowns for better user experience.
 - If this were going beyond a take-home, I would separate app startup, migrations, and seeding more cleanly instead of doing them together for Docker convenience.
