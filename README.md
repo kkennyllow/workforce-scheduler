@@ -191,6 +191,7 @@ Role middleware:
 
 - `requireAuth` returns `401` for unauthenticated requests
 - `requireSupervisor` returns `403` for logged-in staff users on supervisor-only routes
+- `requireStaff` returns `403` for logged-in supervisors on staff-only routes
 
 Required auth environment variable:
 
