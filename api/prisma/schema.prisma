@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  SUPERVISOR
+  STAFF
+}
+
+enum ShiftKind {
+  MORNING
+  AFTERNOON
+  NIGHT
+}
+
+model User {
+  id           Int          @id @default(autoincrement())
+  email        String       @unique
+  passwordHash String
+  name         String
+  role         UserRole
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  staffProfile StaffProfile?
+}
+
+model Site {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  shifts    Shift[]
+}
+
+model StaffProfile {
+  id             Int                  @id @default(autoincrement())
+  userId         Int                  @unique
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  user           User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  certifications StaffCertification[]
+  assignments    Assignment[]
+}
+
+model Certification {
+  id                         Int                  @id @default(autoincrement())
+  name                       String               @unique
+  createdAt                  DateTime             @default(now())
+  updatedAt                  DateTime             @updatedAt
+  staffCertifications        StaffCertification[]
+  shiftsRequiringCertification Shift[]            @relation("RequiredCertification")
+}
+
+model StaffCertification {
+  id              Int           @id @default(autoincrement())
+  staffProfileId  Int
+  certificationId Int
+  createdAt       DateTime      @default(now())
+  staffProfile    StaffProfile  @relation(fields: [staffProfileId], references: [id], onDelete: Cascade)
+  certification   Certification @relation(fields: [certificationId], references: [id], onDelete: Cascade)
+
+  @@unique([staffProfileId, certificationId])
+}
+
+model Shift {
+  id                      Int            @id @default(autoincrement())
+  siteId                  Int
+  kind                    ShiftKind
+  startAt                 DateTime
+  endAt                   DateTime
+  requiredCertificationId Int?
+  createdAt               DateTime       @default(now())
+  updatedAt               DateTime       @updatedAt
+  site                    Site           @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  requiredCertification   Certification? @relation("RequiredCertification", fields: [requiredCertificationId], references: [id], onDelete: SetNull)
+  assignment              Assignment?
+
+  @@unique([siteId, startAt])
+}
+
+model Assignment {
+  id             Int          @id @default(autoincrement())
+  shiftId        Int          @unique
+  staffProfileId Int
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  shift          Shift        @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  staffProfile   StaffProfile @relation(fields: [staffProfileId], references: [id], onDelete: Cascade)
+}
