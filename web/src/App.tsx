@@ -31,6 +31,7 @@ const shiftTimes: Record<(typeof shiftOrder)[number], string> = {
   AFTERNOON: "14:00-22:00",
   NIGHT: "22:00-06:00",
 };
+const seededWeekStart = "2026-01-05";
 
 function getCurrentMonday() {
   const now = new Date();
@@ -108,7 +109,7 @@ function App() {
   const [authMessage, setAuthMessage] = useState<string | null>(null);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [weekStart, setWeekStart] = useState(getCurrentMonday);
+  const [weekStart, setWeekStart] = useState(seededWeekStart);
   const [sites, setSites] = useState<Site[]>([]);
   const [selectedSiteId, setSelectedSiteId] = useState<number | null>(null);
   const [staff, setStaff] = useState<StaffProfile[]>([]);

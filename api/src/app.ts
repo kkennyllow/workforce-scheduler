@@ -163,20 +163,6 @@ app.get("/api/me", requireAuth, (request, response) => {
   response.json(currentUser);
 });
 
-app.get(
-  "/api/auth/supervisor-check",
-  requireAuth,
-  requireSupervisor,
-  (request, response) => {
-    const { currentUser } = request as AuthenticatedRequest;
-    response.json({
-      success: true,
-      message: "Supervisor access confirmed.",
-      user: currentUser,
-    });
-  },
-);
-
 app.get("/api/sites", requireAuth, async (_request, response) => {
   const sites = await prisma.site.findMany({
     orderBy: {
@@ -191,7 +177,7 @@ app.get("/api/sites", requireAuth, async (_request, response) => {
   response.json(sites);
 });
 
-app.get("/api/schedule", requireAuth, async (request, response) => {
+app.get("/api/schedule", requireAuth, requireSupervisor, async (request, response) => {
   const siteId = parseInteger(String(request.query.siteId ?? ""));
   const weekStart = parseWeekStart(request.query.weekStart);
 

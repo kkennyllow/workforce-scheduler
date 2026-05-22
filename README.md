@@ -1,7 +1,5 @@
 # Workforce Scheduler
 
-Initial project skeleton for the take-home assignment.
-
 ## Stack
 
 - Frontend: Vite + React + TypeScript
@@ -66,6 +64,14 @@ workforce-scheduler/
 
    This starts PostgreSQL, runs Prisma migrations, seeds the database, starts the API, and starts the web app.
 
+Main command:
+
+```bash
+docker compose up
+```
+
+Use `docker compose up --build` the first time or after Docker-related changes.
+
 3. Open the app:
 
    - Web: [http://localhost:5173](http://localhost:5173)
@@ -110,6 +116,17 @@ npm run typecheck
 npm run build
 ```
 
+## Tests
+
+Run the included backend rule tests with:
+
+```bash
+cd api
+npm test
+```
+
+These cover the scheduling rule helpers for overlap checks, weekly hour limits, and certification requirements.
+
 ## Database Workflow
 
 ### Run migrations
@@ -147,14 +164,10 @@ The seed is written to be safe to re-run. It uses upserts for the base records a
 - Weekly hour limits are calculated from shifts whose `startAt` falls within a Monday-to-Monday window.
 - Back-to-back shifts are allowed, but overlapping shifts are not.
 - The seeded dataset is a demo fixture for the week starting `2026-01-05`.
+- The app defaults to the seeded demo week `2026-01-05` so the core flow is immediately visible to reviewers.
 - Staff users are read-only in the UI and can only view their own assigned shifts.
 
-## Trade-Offs
 
-- The frontend uses plain React state and simple fetch calls instead of a larger state or data-fetching library.
-- The schedule editor uses dropdowns rather than drag-and-drop to keep the solution straightforward and easy to review.
-- The API keeps validation in route-adjacent code plus a small rules module instead of introducing a more complex service layer.
-- The Docker setup seeds automatically on startup for reviewer convenience, even though a larger production app might separate startup, migrations, and seeding more strictly.
 
 ## Seeded Login Details
 
@@ -175,7 +188,6 @@ Authentication currently works like this:
 - On success, the API sets a JWT in an HttpOnly cookie
 - `GET /api/me` returns the logged-in user from that cookie
 - `POST /api/auth/logout` clears the auth cookie
-- `GET /api/auth/supervisor-check` is a simple protected route for supervisor-only access
 
 Role middleware:
 
@@ -186,7 +198,7 @@ Required auth environment variable:
 
 - `JWT_SECRET`
 
-Do not use a real production secret in this repo. Keep it in your local `.env`.
+Do not use a real production secret in this repo. Keep it in local `.env`.
 
 ## Manual Auth Testing
 
@@ -204,12 +216,6 @@ Then confirm the logged-in user:
 curl -i -b cookies.txt http://localhost:4000/api/me
 ```
 
-Then confirm supervisor-only access:
-
-```bash
-curl -i -b cookies.txt http://localhost:4000/api/auth/supervisor-check
-```
-
 ### Test staff login with curl
 
 ```bash
@@ -222,12 +228,6 @@ Then confirm staff access is authenticated:
 
 ```bash
 curl -i -b cookies.txt http://localhost:4000/api/me
-```
-
-Then confirm supervisor-only access is blocked:
-
-```bash
-curl -i -b cookies.txt http://localhost:4000/api/auth/supervisor-check
 ```
 
 ### Test logout with curl
@@ -252,7 +252,7 @@ Available endpoints:
 Access rules:
 
 - `GET /api/sites` requires authentication
-- `GET /api/schedule` requires authentication
+- `GET /api/schedule` requires supervisor role
 - `PUT /api/shifts/:shiftId/assignment` requires supervisor role
 - `GET /api/staff` requires supervisor role
 - `GET /api/my-shifts` requires authentication and returns only the logged-in user's assigned shifts
@@ -399,8 +399,8 @@ curl -i -b cookies.txt -X PUT http://localhost:4000/api/shifts/NEW_SHIFT_ID/assi
 
 1. Open [http://localhost:5173](http://localhost:5173)
 2. Log in as `supervisor@example.com` with `password123`
-3. The app will load the weekly schedule builder for the current Monday
-4. If you want to inspect the seeded data, change `Week Start` to `2026-01-05`
+3. The app will load the weekly schedule builder for the seeded demo week `2026-01-05`
+4. You can still change `Week Start` manually if you want to inspect a different week
 5. The UI uses a single site view and loads the seeded site automatically
 6. Use the dropdown inside each shift cell to assign, reassign, or unassign staff
 7. If a rule is violated, the API message is shown directly in the page
@@ -409,31 +409,23 @@ curl -i -b cookies.txt -X PUT http://localhost:4000/api/shifts/NEW_SHIFT_ID/assi
 
 1. Open [http://localhost:5173](http://localhost:5173)
 2. Log in as `alice@example.com` with `password123`
-3. If you want to inspect the seeded data, change `Week Start` to `2026-01-05`
-4. The app will show a read-only `My Shifts` view for that week
+3. The app will show a read-only `My Shifts` view for the seeded demo week `2026-01-05`
+4. You can still change `Week Start` manually if you want to inspect a different week
 5. Staff users do not see assignment controls
 
-### Seeded Credentials
-
-- `supervisor@example.com` / `password123`
-- `alice@example.com` / `password123`
-- `bob@example.com` / `password123`
-- `carol@example.com` / `password123`
-- `dan@example.com` / `password123`
-- `eve@example.com` / `password123`
-
-### Known UI Limitations
+### Known Limitations
 
 - I kept the UI to a single-site weekly view because that seemed closest to the brief. The backend can support multiple sites, but I did not build a broader multi-site scheduling workflow.
-- The page starts on the current Monday. Since the seeded demo data is for `2026-01-05`, reviewers will need to switch the week to see the sample schedule right away.
+- The app defaults to the seeded `2026-01-05` demo week for reviewer convenience rather than dynamically opening on the current week.
 - The schedule editor uses simple dropdowns. It is functional, but not especially fast for heavy editing.
 - Validation messages are shown inline in the page, but there is no history, audit trail, or activity log.
+- The automated tests currently cover the scheduling rule helpers, but I did not add integration tests around the authenticated API routes.
 
 ## What I Would Improve With More Time
 
 - I would add a few integration tests around the authenticated schedule routes, especially for assignment updates and error cases.
-- I would make the seeded demo week easier to discover in the UI so a reviewer does not need the README to find the sample data.
 - I would break the main React screen into a few smaller components once the behavior grows any further. For this take-home, I kept it in one place to avoid introducing extra structure too early.
+- I would change the schedule editor to use drag-and-drop rather than dropdowns for better user experience.
 - If this were going beyond a take-home, I would separate app startup, migrations, and seeding more cleanly instead of doing them together for Docker convenience.
 
 ## Optional Extensions
